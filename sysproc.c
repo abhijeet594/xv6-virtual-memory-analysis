@@ -6,7 +6,9 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-
+#include "spinlock.h"
+int shared_counter = 0;
+struct spinlock counterlock;
 int
 sys_fork(void)
 {
@@ -100,4 +102,33 @@ sys_trace(void)
   myproc()->trace = on;
 
   return 0;
+}
+int
+sys_vmmap(void)
+{
+  int va;
+
+  if(argint(0, &va) < 0)
+    return -1;
+
+  return vmmap_info((uint)va);
+}
+int
+sys_counter_reset(void)
+{
+  shared_counter = 0;
+  return 0;
+}
+
+int
+sys_counter_inc(void)
+{
+  shared_counter++;
+  return 0;
+}
+
+int
+sys_counter_get(void)
+{
+  return shared_counter;
 }

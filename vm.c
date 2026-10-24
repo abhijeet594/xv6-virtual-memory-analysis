@@ -53,6 +53,29 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
   }
   return &pgtab[PTX(va)];
 }
+int
+vmmap_info(uint va)
+{
+  pte_t *pte;
+  struct proc *p;
+
+  p = myproc();
+
+  if(va >= p->sz)
+    return -1;
+
+  pte = walkpgdir(p->pgdir, (char*)va, 0);
+
+  if(pte == 0 || !(*pte & PTE_P) || !(*pte & PTE_U))
+    return -1;
+
+  cprintf("\n--- Virtual Memory Mapping ---\n");
+  cprintf("Virtual address:  0x%x\n", va);
+  cprintf("Physical page:    0x%x\n", PTE_ADDR(*pte));
+  cprintf("Page flags:       0x%x\n", PTE_FLAGS(*pte));
+
+  return 0;
+}
 
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
